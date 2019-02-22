@@ -8,3 +8,5 @@ I2C_Display.c
 
 main.c
 
+notes.c
+

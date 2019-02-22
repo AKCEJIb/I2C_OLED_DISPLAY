@@ -67,5 +67,5 @@ void updateScreen(uint8_t y);
 void DISP_BufferData(uint8_t * uData, uint16_t uSize);
 void clearScr();
 void setColumnData(uint16_t col, uint8_t data);
-
+void DisplayInit();
 #endif /* I2C_DISPLAY_H_ */

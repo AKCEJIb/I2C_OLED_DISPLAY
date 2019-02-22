@@ -121,6 +121,70 @@ void DISP_Data(uint8_t uData){
 }
 
 
+void DisplayInit(){
+	DISP_Command(SSD1306_DISPLAY_OFF);
+	_delay_ms(1);
+	DISP_Command(SSD1306_SET_DISPLAY_CLOCK_DIV_RATIO);
+	_delay_ms(1);
+	DISP_Command(0x80);
+	_delay_ms(1);
+	DISP_Command(SSD1306_SET_MULTIPLEX_RATIO);
+	_delay_ms(1);
+	DISP_Command(0x3F);
+	_delay_ms(1);
+	DISP_Command(SSD1306_SET_DISPLAY_OFFSET);
+	_delay_ms(1);
+	DISP_Command(0x00);
+	_delay_ms(1);
+	DISP_Command(SSD1306_SET_START_LINE | 0x0);
+	_delay_ms(1);
+	
+	// We use internal charge pump
+	DISP_Command(SSD1306_CHARGE_PUMP);
+	_delay_ms(1);
+	DISP_Command(0x14);
+	_delay_ms(1);
+	
+	// Horizontal memory mode
+	DISP_Command(SSD1306_MEMORY_ADDR_MODE);
+	_delay_ms(1);
+	DISP_Command(0x00);
+	_delay_ms(1);
+	
+	DISP_Command(SSD1306_SET_SEGMENT_REMAP | 0x1);
+	_delay_ms(1);
+	DISP_Command(SSD1306_COM_SCAN_DIR_DEC);
+	_delay_ms(1);
+	DISP_Command(SSD1306_SET_COM_PINS);
+	_delay_ms(1);
+	DISP_Command(0x12);
+	_delay_ms(1);
+
+	// Max contrast
+	DISP_Command(SSD1306_SET_CONTRAST_CONTROL);
+	_delay_ms(1);
+	DISP_Command(0xCF);
+	_delay_ms(1);
+	DISP_Command(SSD1306_SET_PRECHARGE_PERIOD);
+	_delay_ms(1);
+	DISP_Command(0xF1);
+	_delay_ms(1);
+	
+	DISP_Command(SSD1306_SET_VCOM_DESELECT);
+	_delay_ms(1);
+	DISP_Command(0x40);
+	_delay_ms(1);
+	DISP_Command(SSD1306_DISPLAY_ALL_ON_RESUME);
+	_delay_ms(1);
+	// Non-inverted display
+	DISP_Command(SSD1306_NORMAL_DISPLAY);
+	_delay_ms(1);
+	// Turn display back on
+	DISP_Command(SSD1306_DISPLAY_ON);
+	_delay_ms(1);
+}
+
+
 void updateScreen(uint8_t y){
 	DISP_Command(SSD1306_SET_COLUMN_ADDR);
 	_delay_us(300);
