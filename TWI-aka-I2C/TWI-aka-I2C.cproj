@@ -148,10 +148,10 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="notes.c">
+    <Compile Include="NoteLib.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="notes.h">
+    <Compile Include="NoteLib.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
