@@ -56,6 +56,24 @@
 #define SSD1306_SET_PRECHARGE_PERIOD					0xD9
 #define SSD1306_SET_VCOM_DESELECT						0xDB
 
+/* Display lines */
+#define DLINE_0 0
+#define DLINE_1 1
+#define DLINE_2 2
+#define DLINE_CENTER1 3
+#define DLINE_CENTER2 4
+#define DLINE_5 5
+#define DLINE_6 6
+#define DLINE_7 7
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+
 void I2C_Start();
 void I2C_Stop();
 void I2C_SendByte(uint8_t cAddress, uint8_t cByte);
@@ -66,6 +84,7 @@ void drawPixel(uint16_t x, uint8_t y, uint8_t MODE);
 void updateScreen(uint8_t y);
 void DISP_BufferData(uint8_t * uData, uint16_t uSize);
 void clearScr();
+void clearBuff();
 void setColumnData(uint16_t col, uint8_t data);
 void DisplayInit();
 #endif /* I2C_DISPLAY_H_ */

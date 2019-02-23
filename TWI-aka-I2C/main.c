@@ -6,17 +6,23 @@
 * Íó ýòî áàí äóðà÷îê ¸áàíûé =)
 */
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
+
+#define MENU_COUNT 3
+
+
 #include "I2C_Display.h"
-#include <util/delay.h>
 #include "FontLib.h"
+
+
+
+
 uint8_t hh = 00;
 uint8_t mm = 00;
 uint8_t ss = 00;
 uint8_t CLOCK_MODE = 0;
+
 ISR(TIMER1_COMPA_vect){
-	PORTB ^= (1 << PB3);
+	
 	ss++;
 	if(ss > 59){
 		ss = 0;
@@ -43,7 +49,7 @@ int main(void)
 	char HMS[15];
 	
 	// Animation
-	char ANIM_semicolons[16];
+	//char ANIM_semicolons[16];
 	
 	
 	// SETUP DEBUG LEDS
@@ -53,7 +59,10 @@ int main(void)
 	
 	// SETUP BUTTONS INPUT
 	PORTB |= (1 << PB4 | 1 << PB5 | 1 << PB6 | 1 << PB7);
-	
+	uint8_t dBtnMode = 0;
+	uint8_t dBtnUp = 0;
+	uint8_t dBtnDown = 0;
+	uint8_t dBtnAccept = 0;
 	
 	// SETUP TIMER EVERY 1 SECOND
 	TCCR1B |= (1 << WGM12);
@@ -65,22 +74,49 @@ int main(void)
 	DisplayInit();
 	_delay_ms(10);
 	
-
-
+	// Menu settings
+	uint8_t menuPos = 0;
 	
 	while (1){
 		// Buttons
-		if(~PINB & (1<<PB6)){
-			CLOCK_MODE = 1;
+		
+		
+		
+		uint8_t blBtnUp = abs(dBtnUp - (~PINB & (1<<PB4)));
+		dBtnUp = ~PINB & (1<<PB4);
+		
+		uint8_t blBtnDown = abs(dBtnDown - (~PINB & (1<<PB5)));
+		dBtnDown = ~PINB & (1<<PB5);
+		
+		uint8_t blBtnMode = abs(dBtnMode - (~PINB & (1<<PB6)));
+		dBtnMode = ~PINB & (1<<PB6);
+		
+		uint8_t blBtnAccept = abs(dBtnAccept - (~PINB & (1<<PB7)));
+		dBtnAccept = ~PINB & (1<<PB7);
+		
+		
+		if((~PINB & (1<<PB4)) && blBtnUp){
+			if(menuPos == 0) menuPos = MENU_COUNT;
+			menuPos--;	
+		}
+		if((~PINB & (1<<PB5))  && blBtnDown){
+			menuPos++;
+			if(menuPos >= MENU_COUNT) menuPos = 0;
+		}
+		
+		if((~PINB & (1<<PB6) ) && blBtnMode){
+			CLOCK_MODE ^= 1;
 			clearScr();
-			for(uint8_t i = 0; i < 8; i++)
-				updateScreen(i);
+		}
+		
+		if((~PINB & (1<<PB7)) && blBtnAccept){
+			
 		}
 		
 		// Drawable
 		switch(CLOCK_MODE)
 		{
-			case 0:
+			case 0: // Just Clock
 			
 			itoa(hh,chaH, 10);
 			itoa(mm,chaM, 10);
@@ -103,31 +139,54 @@ int main(void)
 			strcat(HMS, chaS);
 			
 			// Draw Time
-			clearScr();
-			drawString(128/2-strlen(HMS)*8/2, HMS);
-			updateScreen(4);
+			clearBuff();
+			drawStringCentered(HMS);
+			updateScreen(DLINE_CENTER2);
 			
 			
-			// Draw ANIMATIONS
-			clearScr();
-			if(strlen(ANIM_semicolons) == 16)
-			strcpy(ANIM_semicolons,"");
+			// Draw Borders
+			clearBuff();
+			drawStringCentered("----------------");
+			updateScreen(DLINE_2);
+			updateScreen(DLINE_6);
 			
-			strcat(ANIM_semicolons, ":");
-			drawString(128/2-strlen(ANIM_semicolons)*8/2, ANIM_semicolons);
-			
-			updateScreen(2); // The same as 6 layer
-			updateScreen(6); // The same as 2 layer
+			clearBuff();
+			drawString(2, "÷ø");
+			drawStringCentered("×ÀÑÛ");
+			updateScreen(DLINE_0);
+			clearBuff();
+			drawString(2,"ùú×ÃÓ");
+			updateScreen(DLINE_1);
+			//// Draw ANIMATIONS
+			//clearScr();
+			//if(strlen(ANIM_semicolons) == 16)
+			//strcpy(ANIM_semicolons,"");
+			//
+			//strcat(ANIM_semicolons, ":");
+			//drawStringCentered(ANIM_semicolons);
+			//
+			//updateScreen(2); // The same as 6 layer
+			//updateScreen(6); // The same as 2 layer
 			break;
-			case 1:
-			// Draw Alarm Choose
+			case 1: // Settings menu
 			
-			clearScr();
-			drawString(0,"ÊÐÀÁ");
-			updateScreen(0);
-			clearScr();
-			drawString(0,"ÑÎÑÈ ÆÎÏÓ");
-			updateScreen(1);
+			
+			clearBuff();
+			drawStringCentered("ÍÀÑÒÐÎÉÊÈ:");
+			updateScreen(DLINE_0);
+			clearBuff();
+			if(menuPos == 0) drawString(0,">");
+			drawString(8,"1. ÁÓÄÈËÜÍÈÊ");
+			updateScreen(DLINE_2);
+			clearBuff();
+			if(menuPos == 1) drawString(0,">");
+			drawString(8,"2. ÓÑÒ ÂÐÅÌß");
+			updateScreen(DLINE_CENTER1);
+			clearBuff();
+			if(menuPos == 2) drawString(0,">");
+			drawString(8,"3. ÓÑÒ ÄÀÒÓ");
+			updateScreen(DLINE_CENTER2);
+			
 			break;
 		}
 		_delay_ms(10);

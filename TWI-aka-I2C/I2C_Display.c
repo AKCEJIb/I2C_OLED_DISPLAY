@@ -203,10 +203,14 @@ void updateScreen(uint8_t y){
 	_delay_ms(15);
 }
 
-void clearScr(){
+void clearBuff(){
 	memset(bufferok, 0x00, 128);
 }
-
+void clearScr(){
+	clearBuff();
+	for(uint8_t i = 0; i < 8; i++)
+		updateScreen(i);
+}
 void setColumnData(uint16_t col, uint8_t data){
 	bufferok[col] = data;
 }

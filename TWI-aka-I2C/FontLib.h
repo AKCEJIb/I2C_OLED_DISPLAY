@@ -13,6 +13,6 @@
 #define CHAR_HEIGHT 8
 
 void drawString(uint16_t xStart, char * str);
-
+void drawStringCentered(char * str);
 
 #endif /* FONTLIB_H_ */
