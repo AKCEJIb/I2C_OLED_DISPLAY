@@ -538,3 +538,7 @@ void drawString(uint16_t xStart, char * str){
 void drawStringCentered(char * str){
 	drawString(128/2-strlen(str)*8/2, str);
 }
+
+void drawStringRight(char * str){
+	drawString(128-strlen(str)*8, str);
+}

@@ -7,6 +7,9 @@
 
 #include <stdint.h>
 #include <avr/pgmspace.h>
+#include "FontLib.h"
+
+
 #ifndef I2C_DISPLAY_H_
 #define I2C_DISPLAY_H_
 

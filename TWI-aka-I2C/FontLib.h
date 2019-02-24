@@ -14,5 +14,6 @@
 
 void drawString(uint16_t xStart, char * str);
 void drawStringCentered(char * str);
+void drawStringRight(char * str);
 
 #endif /* FONTLIB_H_ */

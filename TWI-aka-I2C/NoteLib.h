@@ -11,32 +11,35 @@
 #ifndef NOTES_H_
 #define NOTES_H_
 
-
-#define E1 12134
-#define G1 10204
-#define A1 9090
-#define A1d 8580
-#define H1 8099
-#define C2 7648
-#define C2d 7220
-#define D2 6814
-#define D2d 6430
-#define E2 6069
-#define F2 5730
-#define G2 5102
-#define A2 4545
-#define G2d 4815
-#define A2d 4291
-#define C3 3822
+#define E1 F_CPU/(1024*2)/329
+#define G1 F_CPU/(1024*2)/392
+#define A1 F_CPU/(1024*2)/440
+#define A1d F_CPU/(1024*2)/466
+#define H1 F_CPU/(1024*2)/493
+#define C2 F_CPU/(1024*2)/523
+#define C2d F_CPU/(1024*2)/554
+#define D2 F_CPU/(1024*2)/587
+#define D2d F_CPU/(1024*2)/622
+#define E2 F_CPU/(1024*2)/659
+#define F2 F_CPU/(1024*2)/698
+#define F2d F_CPU/(1024*2)/739
+#define G2 F_CPU/(1024*2)/784
+#define A2 F_CPU/(1024*2)/880
+#define G2d F_CPU/(1024*2)/830
+#define A2d F_CPU/(1024*2)/932
+#define C3 F_CPU/(1024*2)/1046
 #define P 0
-#define End 1
+#define Dur 1
 
-const uint16_t mario[45] PROGMEM = {E2,E2,P,E2,P,C2,E2,P,
-	G2,P,P,G1,P,P,
-	C2,P,P,G1,P,P,E1,P,
-	P,A1,P,H1,P,A1d,A1,P,
-	G1,E2,G2,A2,P,F2,G2,
-P,E2,P,C2,D2,H1,End};
+const uint8_t alarmSong[] PROGMEM = {
+	E2,P,E2,P,E2,P,P,C2,E2,P,
+	C2, P, G1, P, E1, A1, G1, A1,
+	E2,P,E2,P,P,C2,E2,
+	E1, A1,P,E2,P,E2,P,E2,P,P,C2,E2,P,
+	C2, P, G1,E1, A1, G1,C2, P, G1, P,
+	G1,E1, A1, G1,P,C2,E2,
+	E1, A1,P,E2,P,E2,P
+};
 
 
 #endif /* NOTES_H_ */
