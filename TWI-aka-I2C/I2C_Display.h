@@ -13,12 +13,12 @@
 #ifndef I2C_DISPLAY_H_
 #define I2C_DISPLAY_H_
 
-#define F_CPU 8000000UL // CPU Frequency
+#define F_CPU 6000000UL // CPU Frequency
 #define F_SCL 100000UL // SCL frequency
 #define Prescaler 1
 #define TWBR_val ((((F_CPU / F_SCL) / Prescaler) - 16 ) / 2)
 
-#define DISPLAY_ADDR 0b1111000
+#define DISPLAY_ADDR 0b1111000 // 0x78
 
 #define SSD1306_WIDTH 128
 #define SSD1306_HEIGHT 64

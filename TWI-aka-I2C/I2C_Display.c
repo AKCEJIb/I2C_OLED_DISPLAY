@@ -9,6 +9,7 @@
 #define I2C_ASK_ADDR_BYTE 0x18
 #define I2C_NASK_BYTE 0x20
 #define I2C_ASK_BYTE 0x28
+#define ERRORPIN PB2
 
 #include "I2C_Display.h"
 #include <avr/io.h>
@@ -216,12 +217,10 @@ void setColumnData(uint16_t col, uint8_t data){
 }
 
 void drawPixel(uint16_t x, uint8_t y, uint8_t MODE){
-	//uint16_t	by;
 	uint8_t		bi;
 
 	if ((x>=0) & (x<SSD1306_WIDTH) & (y>=0) & (y<SSD1306_HEIGHT))
 	{
-		//by=((y/8)*SSD1306_WIDTH)+x;
 		bi=y % 8;
 		
 		switch(MODE){
@@ -236,50 +235,32 @@ void drawPixel(uint16_t x, uint8_t y, uint8_t MODE){
 	}
 }
 
-// Ќаше ебучие прерывание, паравозик томас. QUAVO?
+// I2C control with TWI state machine
 ISR(TWI_vect){
 	switch(TWSR){
-		case 0x08: // Start
+		case I2C_START_BYTE: // Start
 			TWDR = _SEND_ADDRESS;
 			TWCR = (1<<TWINT | 1<<TWEN | 1 << TWIE);
 		break;
-		case 0x18: // SLA+W ACK
+		case I2C_ASK_ADDR_BYTE: // SLA+W ACK
 			TWDR = _SEND_PACKETS[_SEND_PACKET_COUNT_AMOUNT-_SEND_PACKET_COUNT];
 			TWCR = (1<<TWINT | 1<<TWEN | 1 << TWIE);
 		break;
-		case 0x28: // BYTE ACK
+		case I2C_ASK_BYTE: // BYTE ACK
 			_SEND_PACKET_COUNT--;
 			if(_SEND_PACKET_COUNT > 0){
-				PORTB &= ~(1 << PB0);
 				TWDR = _SEND_PACKETS[_SEND_PACKET_COUNT_AMOUNT-_SEND_PACKET_COUNT];
 				TWCR = (1<<TWINT | 1<<TWEN | 1 << TWIE);	
 			}else{
 				I2C_Stop();
-				PORTB |= (1 << PB0);
 				free(_SEND_PACKETS);
 			}
 		break;
-		case 0x20: // SLA+W NACK
+		case I2C_NASK_BYTE: // SLA+W NACK
 			I2C_Stop();
-			PORTB |= (1 << PB1); // ¬ключаем пин слева первый сигнализиру€ об ошибке
+			PORTB |= (1 << ERRORPIN); // Enable error pin
 			free(_SEND_PACKETS);
 		break;
-		//case 0x30: // BYTE NACK
-//
-			//PORTB |= (1 << PB1); // ¬ключаем пин слева первый сигнализиру€ об ошибке
-		//break;
-		//case 0x40: // READ ACK
-	//
-			//PORTB |= (1 << PB1); // ¬ключаем пин слева первый сигнализиру€ об ошибке
-		//break;
-		//case 0x48: // READ NACK
-		//
-			//PORTB |= (1 << PB1); // ¬ключаем пин слева первый сигнализиру€ об ошибке
-		//break;
-		//case 0x50: // RECEIVE BYTE
-//
-			//PORTB |= (1 << PB1); // ¬ключаем пин слева первый сигнализиру€ об ошибке
-		//break;
 		
 	}
 }

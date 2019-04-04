@@ -9,6 +9,14 @@
 #define MENU_COUNT 2
 #define ALARM_TIME 10
 
+// Buttons
+#define buttonMode PC1
+#define buttonAccept PC0
+#define buttonUp PC2
+#define buttonDown PC3
+
+#define soundSpeaker PB1
+
 #include "I2C_Display.h"
 #include "NoteLib.h"
 
@@ -34,17 +42,9 @@ uint8_t note = 0;
 uint8_t trackLenght = sizeof(alarmSong)/sizeof(*alarmSong);
 
 ISR(TIMER1_COMPA_vect){
-	if(alarmEnabled && hh == alarmHrs && mm == alarmMin && ss == alarmSecs) alarmFlag = 0;
-	if(alarmEnabled && hh >= alarmHrs && mm >= alarmMin && (ss >= alarmSecs || mm > alarmMin) && !alarmFlag) alarmTime++;
-	if(alarmTime >= ALARM_TIME){
-		alarmTime = 0;
-		alarmEnabled = 0;
-		TCCR0 = 0;
-		bit = 0;
-		note = 0;
-		PORTB &= ~(1 << PB3);
-	}
+	sei();
 	ss++;
+	
 	if(ss > 59){
 		ss = 0;
 		mm++;
@@ -58,17 +58,28 @@ ISR(TIMER1_COMPA_vect){
 		mm = 0;
 		ss = 0;
 	}
+	
+	if(alarmEnabled && hh == alarmHrs && mm == alarmMin && ss == alarmSecs) alarmFlag = 0;
+	if(alarmEnabled && hh >= alarmHrs && mm >= alarmMin && (ss >= alarmSecs || mm > alarmMin) && !alarmFlag) alarmTime++;
+	if(alarmTime >= ALARM_TIME){
+		alarmTime = 0;
+		alarmEnabled = 0;
+		TCCR0 = 0;
+		bit = 0;
+		note = 0;
+		PORTB &= ~(1 << soundSpeaker);
+	}
 }
 ISR(TIMER0_OVF_vect){
-	
+	sei();
 	TCNT0 = 255-setTim;
-	PORTB ^= (1 << PB3);
+	PORTB ^= (1 << soundSpeaker);
 	
 }
 
 int main(void)
 {
-	
+	cli();
 	// char Hours, Minutes, Seconds
 	char chaH[3];
 	char chaM[3];
@@ -76,35 +87,32 @@ int main(void)
 	char HMS[9];
 	
 	
-	// SETUP DEBUG LEDS
-	DDRB |= (1 << PB0 | 1 << PB1 | 1 << PB3);
-	cli();
-	
-	
 	// SETUP BUTTONS INPUT
-	PORTB |= (1 << PB4 | 1 << PB5 | 1 << PB6 | 1 << PB7);
+	PORTC |= (1 << buttonAccept | 1 << buttonUp | 1 << buttonDown | 1 << buttonMode);
+	
 	uint8_t dBtnMode = 0;
 	uint8_t dBtnUp = 0;
 	uint8_t dBtnDown = 0;
 	uint8_t dBtnAccept = 0;
 	
+	sei();
 	// SETUP 16bit TIMER EVERY 1 SECOND
 	TCCR1B |= (1 << WGM12);
 	TIMSK |= ( 1 << OCIE1A);
-	OCR1A = 7811.5;
-	TCCR1B |= ((1 << CS10) | (1 << CS12)); // Timer Enable
-	
+	TCCR1B |= (1 << CS12 | 1 << CS10); // Timer Enable
+	OCR1A = 5858;
 	
 	// Setup 8bit timer
 	TIMSK |= ( 1 << TOIE0 ); // Allow 8bit timer interrupt
 	//TCCR0 |= ( 1 << CS00 | 1 << CS02); // Setup prescale by 1024 =)
 	
 	
-	sei();
+
 	// Initialize display
 	DisplayInit();
 	_delay_ms(10);
-	
+	clearScr();
+	_delay_ms(10);
 	// Menu settings
 	uint8_t menuPos = 0;
 	
@@ -123,26 +131,26 @@ int main(void)
 		}
 		
 		// Buttons
-		uint8_t blBtnUp = abs(dBtnUp - (~PINB & (1<<PB4)));
-		dBtnUp = ~PINB & (1<<PB4);
+		uint8_t blBtnUp = abs(dBtnUp - (~PINC & (1 << buttonUp)));
+		dBtnUp = ~PINC & (1<<buttonUp);
 		
-		uint8_t blBtnDown = abs(dBtnDown - (~PINB & (1<<PB5)));
-		dBtnDown = ~PINB & (1<<PB5);
+		uint8_t blBtnDown = abs(dBtnDown - (~PINC & (1 << buttonDown)));
+		dBtnDown = ~PINC & (1<<buttonDown);
 		
-		uint8_t blBtnMode = abs(dBtnMode - (~PINB & (1<<PB6)));
-		dBtnMode = ~PINB & (1<<PB6);
+		uint8_t blBtnMode = abs(dBtnMode - (~PINC & (1 << buttonMode)));
+		dBtnMode = ~PINC & (1<<buttonMode);
 			
-		uint8_t blBtnAccept = abs(dBtnAccept - (~PINB & (1<<PB7)));
-		dBtnAccept = ~PINB & (1<<PB7);
+		uint8_t blBtnAccept = abs(dBtnAccept - (~PINC & (1 << buttonAccept)));
+		dBtnAccept = ~PINC & (1<<buttonAccept);
 		
 		
-		if((~PINB & (1<<PB4)) && blBtnUp){
+		if((~PINC & (1<<buttonUp)) && blBtnUp){
 			switch(CLOCK_MODE){
-				case 1:  // Меню
+				case 1:  // Menu
 					if(menuPos == 0) menuPos = MENU_COUNT;
 					menuPos--;
 				break;
-				case 2: // Будильник
+				case 2: // Alarm
 					switch(alarmPos){
 						case 0:
 							alarmHrs++;
@@ -159,7 +167,7 @@ int main(void)
 					}
 				break;
 				
-				case 3: // Уст времени
+				case 3: // Set time
 				switch(alarmPos){
 					case 0:
 					hh++;
@@ -177,13 +185,13 @@ int main(void)
 				break;
 			}
 		}
-		if((~PINB & (1<<PB5))  && blBtnDown){
+		if((~PINC & (1<<buttonDown))  && blBtnDown){
 			switch(CLOCK_MODE){
-				case 1: // Меню
+				case 1: // Menu
 					menuPos++;
 					if(menuPos >= MENU_COUNT) menuPos = 0;
 				break;
-				case 2:  // Будильник
+				case 2:  // Alarm
 					switch(alarmPos){
 						case 0:
 							if(alarmHrs == 0) alarmHrs = 24;
@@ -200,7 +208,7 @@ int main(void)
 					}
 				break;
 				
-				case 3:  // Установка времени
+				case 3:  // Set time
 				switch(alarmPos){
 					case 0:
 					if(hh == 0) hh = 24;
@@ -219,7 +227,7 @@ int main(void)
 			}
 		}
 		
-		if((~PINB & (1<<PB6) ) && blBtnMode && !dBtnAccept){
+		if((~PINC & (1 << buttonMode) ) && blBtnMode && !dBtnAccept){
 			if(CLOCK_MODE > 0){
 				CLOCK_MODE = 0;
 			}else{
@@ -228,25 +236,25 @@ int main(void)
 			clearScr();
 		}
 		
-		if((~PINB & (1<<PB7)) && blBtnAccept){
+		if((~PINC & (1 << buttonAccept)) && blBtnAccept){
 			switch(CLOCK_MODE){
-				case 1: // Меню настроек
+				case 1: // Settings menu
 				
 					switch(menuPos){
-						case 0: // Переходим в меню настройки будильника
+						case 0: // Alarm menu setup
 							alarmPos = 0;
 							CLOCK_MODE = 2;
 							clearScr();
 						break;
-						case 1: // Переходим в меню настройки времени
+						case 1: // Clock menu setup
 							CLOCK_MODE = 3;
 							clearScr();
 						break;
 					}
 				
 				break;
-				case 2: // Меню установки будильника
-					if(dBtnMode){
+				case 2: // Alarm setup menu
+					if(dBtnMode){ // Disable alarm
 						alarmEnabled = 0;
 						alarmPos = 0;
 						clearScr();
@@ -255,7 +263,7 @@ int main(void)
 					alarmPos++;
 					if(alarmPos > 2) {
 						alarmPos = 0;
-						alarmEnabled = 1; // Включение будильника
+						alarmEnabled = 1; // Enable alarm
 						
 						if(alarmHrs <= hh) alarmFlag = 1;
 						if(alarmMin <= mm) alarmFlag = 1;
@@ -265,19 +273,19 @@ int main(void)
 						CLOCK_MODE = 0;
 					}
 				break;
-				case 3: // Меню установки времени
+				case 3: // Clock menu
 					alarmPos++;
 					if(alarmPos > 2 && !dBtnMode) alarmPos = 0;
 				break;
 				default:
-					// Если будет звонить будильник сделать отключение
+					// Disable alarm
 					if(alarmEnabled && hh >= alarmHrs && mm >= alarmMin && (ss >= alarmSecs || mm > alarmMin) && !alarmFlag) {
 						alarmTime = 0;
 						alarmEnabled = 0;
 						TCCR0 = 0;
 						bit = 0;
 						note = 0;
-						PORTB &= ~(1 << PB3);
+						PORTC &= ~(1 << soundSpeaker);
 					}
 				break;
 			}
@@ -289,8 +297,8 @@ int main(void)
 		// Drawable
 		switch(CLOCK_MODE)
 		{
-			/*--------------------------------*/
-			case 0: // Дата, часы
+			/*--------------- Main Screen -----------------*/
+			case 0: // Time, Main Screen
 			
 				itoa(hh,chaH, 10);
 				itoa(mm,chaM, 10);
@@ -338,8 +346,8 @@ int main(void)
 			
 			break;
 			
-			/*-----------------МЕНЮ---------------*/
-			case 1: // Меню настроек
+			/*-----------------MENU---------------*/
+			case 1: // Settings menu
 			
 			
 				clearBuff();
@@ -355,7 +363,7 @@ int main(void)
 				updateScreen(DLINE_CENTER1);
 				clearBuff();
 			break;
-			/*---------------УСТ БУДИЛЬНИК-----------------*/
+			/*---------------SET ALARM-----------------*/
 			case 2:
 				itoa(alarmHrs, chaH, 10);
 				itoa(alarmMin, chaM, 10);
@@ -391,8 +399,8 @@ int main(void)
 				updateScreen(DLINE_5);
 				
 			break;
-			/*------------УСТ ВРЕМЯ-------------*/
-			case 3: // Меню установки времени
+			/*------------SET TIME-------------*/
+			case 3: // Time set menu
 				clearBuff();
 				drawStringCentered("УСТ ВРЕМЯ");
 				updateScreen(DLINE_0);
