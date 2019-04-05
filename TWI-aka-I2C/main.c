@@ -29,8 +29,8 @@ uint8_t CLOCK_MODE = 0;
 // Alarm settings
 uint8_t alarmHrs = 0;
 uint8_t alarmMin = 0;
-uint8_t alarmSecs = 0;
-uint8_t alarmEnabled = 0;
+uint8_t alarmSecs = 10;
+uint8_t alarmEnabled = 1;
 uint8_t alarmPos = 0;
 uint8_t alarmTime = 0;
 uint8_t alarmFlag = 0;
@@ -338,10 +338,11 @@ int main(void)
 				clearBuff();
 				drawString(2, "÷ø");
 				drawStringCentered("×ÀÑÛ");
+				if(alarmEnabled) drawStringRight("ûü");
 				updateScreen(DLINE_0);
 				clearBuff();
 				drawString(2,"ùú×ÃÓ");
-				if(alarmEnabled) drawStringRight("ÁÓÄ: ÂÊË");
+				if(alarmEnabled) drawStringRight("ış");
 				updateScreen(DLINE_1);
 			
 			break;
