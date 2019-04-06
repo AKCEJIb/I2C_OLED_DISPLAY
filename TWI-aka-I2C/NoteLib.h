@@ -32,13 +32,7 @@
 #define Dur 1
 
 const uint8_t alarmSong[] PROGMEM = {
-	E2,P,E2,P,E2,P,P,C2,E2,P,
-	C2, P, G1, P, E1, A1, G1, A1,
-	E2,P,E2,P,P,C2,E2,
-	E1, A1,P,E2,P,E2,P,E2,P,P,C2,E2,P,
-	C2, P, G1,E1, A1, G1,C2, P, G1, P,
-	G1,E1, A1, G1,P,C2,E2,
-	E1, A1,P,E2,P,E2,P
+	E1, G1, E1, G1, E1, G1, A1, G1, A1, E1, G1, E1, A1, G1, G2, A2, A1, E1, E2, A1, G1, P, P, P, P
 };
 
 

@@ -7,7 +7,7 @@
 
 
 #define MENU_COUNT 2
-#define ALARM_TIME 10
+#define ALARM_TIME 30
 
 // Buttons
 #define buttonMode PC1
@@ -29,8 +29,8 @@ uint8_t CLOCK_MODE = 0;
 // Alarm settings
 uint8_t alarmHrs = 0;
 uint8_t alarmMin = 0;
-uint8_t alarmSecs = 10;
-uint8_t alarmEnabled = 1;
+uint8_t alarmSecs = 0;
+uint8_t alarmEnabled = 0;
 uint8_t alarmPos = 0;
 uint8_t alarmTime = 0;
 uint8_t alarmFlag = 0;
@@ -42,7 +42,7 @@ uint8_t note = 0;
 uint8_t trackLenght = sizeof(alarmSong)/sizeof(*alarmSong);
 
 ISR(TIMER1_COMPA_vect){
-	sei();
+
 	ss++;
 	
 	if(ss > 59){
@@ -71,8 +71,8 @@ ISR(TIMER1_COMPA_vect){
 	}
 }
 ISR(TIMER0_OVF_vect){
-	sei();
-	TCNT0 = 255-setTim;
+
+	TCNT0 = 255 - setTim;
 	PORTB ^= (1 << soundSpeaker);
 	
 }
@@ -86,6 +86,8 @@ int main(void)
 	char chaS[3];
 	char HMS[9];
 	
+	// Setup speaker port
+	DDRB |= (1 << soundSpeaker);
 	
 	// SETUP BUTTONS INPUT
 	PORTC |= (1 << buttonAccept | 1 << buttonUp | 1 << buttonDown | 1 << buttonMode);
@@ -124,10 +126,11 @@ int main(void)
 		// Alarm
 		if(alarmEnabled && hh >= alarmHrs && mm >= alarmMin && (ss >= alarmSecs || mm > alarmMin) && !alarmFlag){
 			note = pgm_read_word(&alarmSong[bit]);
-			if(!note) TCCR0 = 0; else TCCR0 |= ( 1 << CS00 | 1 << CS02);
-			if(note != 1)
+			if(note == 0){ setTim = 0; TCCR0 = 0;} else TCCR0 |= ( 1 << CS00 | 1 << CS02);
+			if(note != 1 && note != 0)
 			setTim = note;
-			if(bit++ >= trackLenght) bit = 0;
+			if(bit++ >= trackLenght) {bit = 0; setTim = 0; TCCR0 = 0;}
+			PORTB &= ~(1 << soundSpeaker);
 		}
 		
 		// Buttons
