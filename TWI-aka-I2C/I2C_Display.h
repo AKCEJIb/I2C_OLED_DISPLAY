@@ -13,7 +13,7 @@
 #ifndef I2C_DISPLAY_H_
 #define I2C_DISPLAY_H_
 
-#define F_CPU 6000000UL // CPU Frequency
+#define F_CPU 12000000UL // CPU Frequency
 #define F_SCL 100000UL // SCL frequency
 #define Prescaler 1
 #define TWBR_val ((((F_CPU / F_SCL) / Prescaler) - 16 ) / 2)

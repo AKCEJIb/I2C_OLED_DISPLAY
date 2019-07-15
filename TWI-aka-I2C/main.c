@@ -1,8 +1,8 @@
 /*
-* TWI-aka-I2C.c
+* Main.c
 *
 * Created: 18.02.2019 22:32:22
-* Author : AKCEJIb
+* Author : admin
 */
 
 
@@ -20,9 +20,9 @@
 #include "I2C_Display.h"
 #include "NoteLib.h"
 
-uint8_t hh = 00;
-uint8_t mm = 00;
-uint8_t ss = 00;
+uint8_t hh = 12;
+uint8_t mm = 34;
+uint8_t ss = 56;
 uint8_t CLOCK_MODE = 0;
 
 
@@ -102,7 +102,7 @@ int main(void)
 	TCCR1B |= (1 << WGM12);
 	TIMSK |= ( 1 << OCIE1A);
 	TCCR1B |= (1 << CS12 | 1 << CS10); // Timer Enable
-	OCR1A = 5858;
+	OCR1A = 11718;
 	
 	// Setup 8bit timer
 	TIMSK |= ( 1 << TOIE0 ); // Allow 8bit timer interrupt
