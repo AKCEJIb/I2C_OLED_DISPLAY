@@ -1,5 +1,5 @@
 # I2C_OLED_DISPLAY
-I2C oled lisplay library (0.96)' 128x64 px SSD1306
+I2C oled display library (0.96)' 128x64 px SSD1306
 
 Библиотека разработанная под Atmega8.
 Работает со 128 байтами памяти, обновляет экран постранично (см. [даташит](https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf)). 
